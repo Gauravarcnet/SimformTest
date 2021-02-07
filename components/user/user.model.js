@@ -3,30 +3,33 @@ const Schema = mongoose.Schema
 const bcrypt = require('bcrypt')
 
 const userSchema = new Schema({
-  firstName: {
+  name: {
     type: String,
     default: ''
-  },
-  lastName: {
-    type: String,
-    default: ''
-  },
-  email: {
-    type: String,
-    default: '',
-    lowercase: true
   },
   password: {
     type: String,
     default: ''
-    // select: false
   },
-  loggedIn: {
-    type: Date
+
+  email: {
+    type: String,
+    default: '',
+    // lowercase: true
   },
+  organization: {
+    type: Schema.Types.ObjectId,
+    ref: 'Organization'
+  },
+  status: {
+    type: Number,
+    default: 1   // 1 : active : 2 : deleted
+  },
+
+
 }, {
-  timestamps: true
-})
+    timestamps: true
+  })
 // userSchema.plugin(autopopulate);
 
 userSchema.methods.generateHash = function (password) {

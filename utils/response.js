@@ -7,12 +7,14 @@ function response() {
   const methods = {
     success: (res, status, data = null, message = 'success') => {
       return res.status(status).json({
-        status,
-        message,
-        data
+        statusCode: status,
+        body: {
+          message,
+          data
+        }
       });
     },
-    
+
     errors: (res, status, err = {}) => {
       error(err);
       const errors = {

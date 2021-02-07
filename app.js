@@ -2,7 +2,6 @@
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
-const morgan = require('morgan')
 const helmet = require('helmet')
 const glob = require('glob')
 const cors = require('cors')
@@ -15,7 +14,7 @@ const authenticate = require('./utils/authenticate')
 /* Protecting headers */
 app.use(helmet());
 
-/* Body parser config */
+/* Body parser of limit 50mb  */
 app.use(
   bodyParser.json({
     limit: '50mb'
@@ -29,10 +28,12 @@ app.use(
   })
 );
 
-app.use(appLogger.requestDetails(appLogger));
+app.use(appLogger.requestDetails(appLogger)) // need to write check functionality
 
-app.use('/public', express.static('public'));
+app.use('/public', express.static('public')) //Serving Static Files
 require('./config/db');
+
+
 
 /* CORS setup */
 //const domain = 'https://domain.com';
@@ -46,26 +47,22 @@ app.use(cors());
 /* Apply error handlers to app */
 require('./utils/errorHandler')(app);
 
-/* Log requests to console */
-app.use(morgan('dev'));
-
 /* Router setup */
 const openRouter = express.Router(); // Open routes
 const apiRouter = express.Router(); // Protected routes
 
 /* Fetch router files and apply them to our routers */
 glob('./components/*', null, (err, items) => {
-
   items.forEach(component => {
     require(component).routes && require(component).routes(
       openRouter,
       apiRouter
-    );
-  });
-  
-});  
+    )
+  })
 
-apiRouter.use(authenticate.verifyToken);
+})
+
+apiRouter.use(authenticate.verifyToken)
 app.use('/v1', openRouter);
 app.use('/api/v1', apiRouter);
 

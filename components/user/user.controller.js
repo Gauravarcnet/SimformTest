@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken')
 const User = require("./user.model")
+const Organization = require("./../organization/organization.model")
+
 
 
 /* 
@@ -28,11 +30,8 @@ function userCtrl() {
           searchQuery = {}
           searchQuery.email = data.email
         }
-
         //Check user exist with particular email 
-        let user = await User.findOne({
-          searchQuery
-        }).lean()
+        let user = await User.findOne(searchQuery).lean()
 
         // If user already exist Response with 
         if (user) return errors(res, 400, 'User Already Exist')
@@ -40,9 +39,9 @@ function userCtrl() {
 
         let newUser = new User({
           email: data.email,
-          firstName: data.firstName || '',
-          lastName: data.lastName || '',
-          password: data.password ? generateHash(data.password) : ''
+          name: data.name || '',
+          password: data.password ? generateHash(data.password) : '',
+          organization: data.organization
         })
 
         await newUser.save()
@@ -111,7 +110,95 @@ function userCtrl() {
         console.log(e)
         return errors(res, 500, e)
       }
-    }
+    },
+    userList: async (req, res) => {
+
+      try {
+        let userName = req.query.userName,
+          organizationName = req.query.organizationName,
+          skip = parseInt(req.query.skip) || 0,
+          limit = parseInt(req.query.limit) || 10
+        userList = await User.aggregate([
+          {
+            $lookup: {
+              from: 'organizations',
+              localField: 'organization',
+              foreignField: '_id',
+              as: 'organization'
+            }
+          },
+          {
+            $unwind: {
+              path: '$organization',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $match: {
+              "name": { $regex: ".*" + userName + ".*" },
+              "organization.name": { $regex: ".*" + organizationName + ".*", $options: 'i' },
+              "status": 1
+            },
+          },
+          {
+            $project: {
+              "name": 1, "email": 1, "organization.name": "$organization.name",
+              "organization.location": "$organization.location",
+              "status": 1,
+              "organization.size": "$organization.size",
+              "organization.established": "$organization.established",
+              "organization.type": "$organization.type"
+            }
+          },
+          { $skip: skip }, { $limit: limit }
+        ])
+        return success(res, 200, userList, 'user list data')
+      } catch (e) {
+        console.log(e)
+        return errors(res, 500, e)
+      }
+    },
+
+    editUser: async (req, res) => {
+      try {
+
+        let _id = req.body.id
+        data = req.body
+
+        let updateUserStatus = await User.update({
+          _id: _id,
+        }, data)
+        if (updateUserStatus.nModified === 1) {
+          return success(res, 200, 'user data updated successfully')
+        } else {
+          return errors(res, 400, "User not updated")
+        }
+
+      } catch (e) {
+        console.log(e)
+        return errors(res, 500, e)
+      }
+    },
+    deleteUser: async (req, res) => {
+      try {
+        let _id = req.query.id
+        data = req.body
+        let deleteUserStatus = await User.update({
+          _id: _id,
+        }, {
+            status: 2
+          })
+        if (deleteUserStatus.nModified === 1) {
+          return success(res, 200, data, 'User deleted')
+        } else {
+          return errors(res, 400, "User deleted already")
+        }
+
+      } catch (e) {
+        console.log(e)
+        return errors(res, 500, e)
+      }
+    },
   }
   return Object.freeze(methods)
 }

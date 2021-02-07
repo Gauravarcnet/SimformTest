@@ -9,7 +9,6 @@ function authenticate() {
   const methods = {
     verifyToken: async (req, res, next) => {
       try {
-
         //
         let token = req.headers['x-access-token']
 
@@ -23,7 +22,6 @@ function authenticate() {
             email: decoded.email,
           }]
         }).select('-password').lean();
-  
         if (userData) {
           req.user = userData;
           next();
@@ -32,10 +30,7 @@ function authenticate() {
         }
       } catch (error) {
         return errors(res, 400, 'Invalid token')
-
       }
-      
-     
     }
   };
   return Object.freeze(methods);

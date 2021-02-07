@@ -1,5 +1,5 @@
-# Voucher
-Generate Voucher Coupons and Redeems
+# User Organization
+Generate User Organization Api
 
 ## install
     npm packages
@@ -17,40 +17,31 @@ Generate Voucher Coupons and Redeems
     Mongoose client which  is running locally on 27017 by defalut
 
 ### server 
-    is running on port by default 3000,  bt i am reading from .env file you can also change in .env file
+    is running on port by default 3040,  bt i am reading from .env file you can also change in .env file
 
-### Email
-    i am using nodemailer
-    host:smtp
 
 ### Two component 
     
 #### user
     where user signup api
-        /signUp for signup whose is going to add voucher its like admin
-        /login 
+        POST :   /signUp for signup whose is going to (open api)
+        POST :   /login  to signin user form (open api)
+        PUT :   /edit to edit user (close api) // i have not added authorization in these api
+        DELETE: /delete to delete any user (close api) // i have not added authorization in these api
+
+        GET :   /userList to fetch userlist (close api) // i have not added authorization in these api
 
 #### Jwt for authentication
 
-#### Voucher
-    where voucher pai
-    voucher/create : Voucher Generation API (Its only authenticated api)(closed api)
-    voucher/fetch : Get Vouchers API (open api)
-    voucher/redeem : Voucher Redeem API (open api)
+#### Organization
+    
+        GET : /Organization : Add Organization API (open api)
+        POST : /Organization : Get Organization API (open api)
 
 
 ### postman Collection 
-    link: https://www.getpostman.com/collections/6e7cd137027e32ace9f1
+    link: https://www.getpostman.com/collections/bcac7832eac8d48bb490
 
-##### dump 
-    folder have database collections for users and vouchers 
-
-### logger
-    Winston and morgan i have used 
-
-    Updating logs in voucher and in db
-
-    
 
 
 
